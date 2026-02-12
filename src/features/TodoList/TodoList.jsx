@@ -1,25 +1,12 @@
 import React from 'react';
 import TodoListItem from './TodoListItem';
 
-function TodoList({
-  todoList,
-  onCompleteTodo,
-  onUpdateTodo,
-  isLoading,
-  errorMessage,
-}) {
+function TodoList({ todoList, onCompleteTodo, onUpdateTodo, isLoading }) {
   const filteredTodoList = todoList.filter((todo) => !todo.isCompleted);
   if (isLoading) {
     return <p>Todo list loading...</p>;
   }
-  if (errorMessage) {
-    return (
-      <div>
-        <hr />
-        <p className="error">{errorMessage}</p>
-      </div>
-    );
-  }
+
   return filteredTodoList.length === 0 ? (
     <p>Add todo above to get started</p>
   ) : (

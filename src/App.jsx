@@ -3,17 +3,20 @@ import TodoList from './features/TodoList/TodoList';
 import TodoForm from './features/TodoForm';
 import { useState, useEffect } from 'react';
 import TodoListItem from './features/TodoList/TodoListItem';
+import TodosViewForm from './features/TodosViewForm';
 
 function App() {
   const [todoList, setTodoList] = useState([]);
+  const [sortField, setSortField] = useState('createdTime');
+  const [sortDirection, setSortDirection] = useState('desc');
 
   const addTodo = async (newTodo) => {
     const payload = {
       records: [
         {
           fields: {
-            Title: newTodo.title,
-            IsCompleted: newTodo.isCompleted,
+            title: newTodo.title,
+            isCompleted: newTodo.isCompleted,
           },
         },
       ],
@@ -28,15 +31,18 @@ function App() {
     };
     try {
       setIsSaving(true);
-      const resp = await fetch(url, options);
+      const resp = await fetch(
+        encodeUrl({ sortField, sortDirection }),
+        options
+      );
       if (!resp.ok) {
         throw new Error(resp.message || 'Failed to add todo');
       }
       const { records } = await resp.json();
       const savedTodo = {
         id: records[0].id,
-        title: records[0].fields.Title,
-        isCompleted: records[0].fields.IsCompleted ?? false,
+        title: records[0].fields.title,
+        isCompleted: records[0].fields.isCompleted ?? false,
       };
       setTodoList([...todoList, savedTodo]);
     } catch (error) {
@@ -62,8 +68,8 @@ function App() {
         {
           id,
           fields: {
-            Title: originalTodo.title,
-            IsCompleted: true,
+            title: originalTodo.title,
+            isCompleted: true,
           },
         },
       ],
@@ -80,7 +86,10 @@ function App() {
 
     try {
       setIsSaving(true);
-      const resp = await fetch(url, options);
+      const resp = await fetch(
+        encodeUrl({ sortField, sortDirection }),
+        options
+      );
       if (!resp.ok) {
         throw new Error(resp.message || 'Failed to complete todo');
       }
@@ -91,7 +100,7 @@ function App() {
         if (todo.id === records[0].id) {
           return {
             ...todo,
-            isCompleted: records[0].fields.IsCompleted ?? false,
+            isCompleted: records[0].fields.isCompleted ?? false,
           };
         }
         return todo;
@@ -119,8 +128,8 @@ function App() {
         {
           id: editedTodo.id,
           fields: {
-            Title: editedTodo.title,
-            IsCompleted: editedTodo.isCompleted,
+            title: editedTodo.title,
+            isCompleted: editedTodo.isCompleted,
           },
         },
       ],
@@ -135,7 +144,10 @@ function App() {
     };
     try {
       setIsSaving(true);
-      const resp = await fetch(url, options);
+      const resp = await fetch(
+        encodeUrl({ sortField, sortDirection }),
+        options
+      );
       if (!resp.ok) {
         throw new Error(resp.message || 'Failed to update todo');
       }
@@ -144,8 +156,8 @@ function App() {
         if (todo.id === records[0].id) {
           return {
             ...todo,
-            title: records[0].fields.Title,
-            isCompleted: records[0].fields.IsCompleted ?? false,
+            title: records[0].fields.title,
+            isCompleted: records[0].fields.isCompleted ?? false,
           };
         }
         return todo;
@@ -171,6 +183,10 @@ function App() {
 
   const url = `https://api.airtable.com/v0/${import.meta.env.VITE_BASE_ID}/${import.meta.env.VITE_TABLE_NAME}`;
   const token = `Bearer ${import.meta.env.VITE_PAT}`;
+  const encodeUrl = ({ sortField, sortDirection }) => {
+    let sortQuery = `sort[0][field]=${sortField}&sort[0][direction]=${sortDirection}`;
+    return encodeURI(`${url}?${sortQuery}`);
+  };
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -184,7 +200,10 @@ function App() {
         },
       };
       try {
-        const resp = await fetch(url, options);
+        const resp = await fetch(
+          encodeUrl({ sortField, sortDirection }),
+          options
+        );
         if (!resp.ok) {
           throw new Error(resp.message || 'Failed to fetch todos');
         }
@@ -207,7 +226,7 @@ function App() {
       }
     };
     fetchTodos();
-  }, []);
+  }, [sortField, sortDirection]);
 
   return (
     <div>
@@ -218,8 +237,19 @@ function App() {
         onCompleteTodo={completeTodo}
         onUpdateTodo={updateTodo}
         isLoading={isLoading}
-        errorMessage={errorMessage}
       />
+      <hr />
+      <TodosViewForm
+        sortDirection={sortDirection}
+        setSortDirection={setSortDirection}
+        sortField={sortField}
+        setSortField={setSortField}
+      />
+      {errorMessage && (
+        <div>
+          <p className="error">{errorMessage}</p>
+        </div>
+      )}
     </div>
   );
 }
