@@ -4,6 +4,7 @@ import TodoForm from './features/TodoForm';
 import { useState, useEffect } from 'react';
 import TodoListItem from './features/TodoList/TodoListItem';
 import TodosViewForm from './features/TodosViewForm';
+import { useCallback } from 'react';
 
 function App() {
   const [todoList, setTodoList] = useState([]);
@@ -31,10 +32,7 @@ function App() {
     };
     try {
       setIsSaving(true);
-      const resp = await fetch(
-        encodeUrl({ sortField, sortDirection, queryString }),
-        options
-      );
+      const resp = await fetch(encodeUrl(), options);
       if (!resp.ok) {
         throw new Error(resp.message || 'Failed to add todo');
       }
@@ -86,10 +84,7 @@ function App() {
 
     try {
       setIsSaving(true);
-      const resp = await fetch(
-        encodeUrl({ sortField, sortDirection, queryString }),
-        options
-      );
+      const resp = await fetch(encodeUrl(), options);
       if (!resp.ok) {
         throw new Error(resp.message || 'Failed to complete todo');
       }
@@ -144,10 +139,7 @@ function App() {
     };
     try {
       setIsSaving(true);
-      const resp = await fetch(
-        encodeUrl({ sortField, sortDirection, queryString }),
-        options
-      );
+      const resp = await fetch(encodeUrl(), options);
       if (!resp.ok) {
         throw new Error(resp.message || 'Failed to update todo');
       }
@@ -183,16 +175,17 @@ function App() {
 
   const url = `https://api.airtable.com/v0/${import.meta.env.VITE_BASE_ID}/${import.meta.env.VITE_TABLE_NAME}`;
   const token = `Bearer ${import.meta.env.VITE_PAT}`;
-  const encodeUrl = ({ sortField, sortDirection, queryString }) => {
+
+  const [queryString, setQueryString] = useState('');
+
+  const encodeUrl = useCallback(() => {
     let sortQuery = `sort[0][field]=${sortField}&sort[0][direction]=${sortDirection}`;
     let searchQuery = '';
     if (queryString) {
       searchQuery = `&filterByFormula=SEARCH("${queryString}",+title)`;
     }
     return encodeURI(`${url}?${sortQuery}${searchQuery}`);
-  };
-
-  const [queryString, setQueryString] = useState('');
+  }, [sortField, sortDirection, queryString]);
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -206,10 +199,7 @@ function App() {
         },
       };
       try {
-        const resp = await fetch(
-          encodeUrl({ sortField, sortDirection, queryString }),
-          options
-        );
+        const resp = await fetch(encodeUrl(), options);
         if (!resp.ok) {
           throw new Error(resp.message || 'Failed to fetch todos');
         }
