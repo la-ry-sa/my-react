@@ -1,6 +1,17 @@
 import { useRef } from 'react';
 import { useState } from 'react';
 import TextInputWithLabel from '../shared/TextInputWithLabel';
+import styled from 'styled-components';
+
+const StyledForm = styled.form`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+`;
+
+const StyledButton = styled.button`
+  font-style: ${(props) => (props.disabled ? 'italic' : 'normal')};
+`;
 
 function TodoForm({ onAddTodo, isSaving }) {
   const todoTitleInput = useRef('');
@@ -16,8 +27,18 @@ function TodoForm({ onAddTodo, isSaving }) {
     todoTitleInput.current.focus();
   }
 
+  const StyledForm = styled.form`
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  `;
+
+  const StyledButton = styled.button`
+    font-style: ${(props) => (props.disabled ? 'italic' : 'normal')};
+  `;
+
   return (
-    <form onSubmit={handleAddTodo}>
+    <StyledForm onSubmit={handleAddTodo}>
       <TextInputWithLabel
         elementId="todoTitle"
         labelText="Todo"
@@ -25,10 +46,10 @@ function TodoForm({ onAddTodo, isSaving }) {
         value={workingTodoTitle}
         onChange={(event) => setWorkingTodoTitle(event.target.value)}
       />
-      <button type="submit" disabled={workingTodoTitle.trim() === ''}>
+      <StyledButton type="submit" disabled={workingTodoTitle.trim() === ''}>
         {isSaving ? 'Saving...' : 'Add Todo'}
-      </button>
-    </form>
+      </StyledButton>
+    </StyledForm>
   );
 }
 
