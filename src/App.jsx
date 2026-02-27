@@ -3,7 +3,6 @@ import styles from './App.module.css';
 import TodoList from './features/TodoList/TodoList';
 import TodoForm from './features/TodoForm';
 import { useState, useEffect, useCallback, useReducer } from 'react';
-import TodoListItem from './features/TodoList/TodoListItem';
 import TodosViewForm from './features/TodosViewForm';
 import {
   reducer as todosReducer,
@@ -13,8 +12,8 @@ import {
 
 function App() {
   const [todoState, dispatch] = useReducer(todosReducer, initialTodoState);
-
-  const [todoList, setTodoList] = useState([]);
+  const url = `https://api.airtable.com/v0/${import.meta.env.VITE_BASE_ID}/${import.meta.env.VITE_TABLE_NAME}`;
+  const token = `Bearer ${import.meta.env.VITE_PAT}`;
   const [sortField, setSortField] = useState('createdTime');
   const [sortDirection, setSortDirection] = useState('desc');
 
@@ -135,13 +134,6 @@ function App() {
     }
   };
 
-  const [isLoading, setIsLoading] = useState(false);
-
-  const [errorMessage, setErrorMessage] = useState('');
-
-  const url = `https://api.airtable.com/v0/${import.meta.env.VITE_BASE_ID}/${import.meta.env.VITE_TABLE_NAME}`;
-  const token = `Bearer ${import.meta.env.VITE_PAT}`;
-
   const [queryString, setQueryString] = useState('');
 
   const encodeUrl = useCallback(() => {
@@ -152,8 +144,6 @@ function App() {
     }
     return encodeURI(`${url}?${sortQuery}${searchQuery}`);
   }, [sortField, sortDirection, queryString]);
-
-  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const fetchTodos = async () => {
@@ -186,12 +176,12 @@ function App() {
     <div className={styles.app}>
       <div className={styles.container}>
         <h1>My Todos</h1>
-        <TodoForm onAddTodo={addTodo} isSaving={isSaving} />
+        <TodoForm onAddTodo={addTodo} isSaving={todoState.isSaving} />
         <TodoList
-          todoList={todoList}
+          todoList={todoState.todoList}
           onCompleteTodo={completeTodo}
           onUpdateTodo={updateTodo}
-          isLoading={isLoading}
+          isLoading={todoState.isLoading}
         />
         <hr />
         <TodosViewForm
@@ -202,9 +192,9 @@ function App() {
           queryString={queryString}
           setQueryString={setQueryString}
         />
-        {errorMessage && (
+        {todoState.errorMessage && (
           <div className={styles.errorBox}>
-            <p>{errorMessage}</p>
+            <p>{todoState.errorMessage}</p>
           </div>
         )}
       </div>
