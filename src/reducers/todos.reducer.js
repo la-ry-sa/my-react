@@ -76,12 +76,6 @@ function reducer(state = initialState, action) {
         isLoading: false,
         isSaving: false,
       };
-    case actions.setLoadError:
-      return {
-        ...state,
-        errorMessage: action.error.message,
-        isLoading: false,
-      };
     case actions.revertTodo:
     case actions.updateTodo:
       const updatedTodos = state.todoList.map((todo) => {
@@ -111,8 +105,8 @@ function reducer(state = initialState, action) {
       };
     case actions.clearError:
       return {
-        errorMessage: '',
         ...state,
+        errorMessage: '',
       };
   }
 }

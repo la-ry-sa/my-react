@@ -27,22 +27,12 @@ function TodoForm({ onAddTodo, isSaving }) {
     todoTitleInput.current.focus();
   }
 
-  const StyledForm = styled.form`
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  `;
-
-  const StyledButton = styled.button`
-    font-style: ${(props) => (props.disabled ? 'italic' : 'normal')};
-  `;
-
   return (
     <StyledForm onSubmit={handleAddTodo}>
       <TextInputWithLabel
         elementId="todoTitle"
         labelText="Todo"
-        ref={todoTitleInput}
+        inputRef={todoTitleInput}
         value={workingTodoTitle}
         onChange={(event) => setWorkingTodoTitle(event.target.value)}
       />
