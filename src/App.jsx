@@ -2,13 +2,18 @@ import './App.css';
 import styles from './App.module.css';
 import TodoList from './features/TodoList/TodoList';
 import TodoForm from './features/TodoForm';
-import { useState, useEffect, useCallback, useReducer } from 'react';
+import { useState, useEffect, useCallback, useReducer, use } from 'react';
+import { Routes, Route, useLocation } from 'react-router';
 import TodosViewForm from './features/TodosViewForm';
 import {
   reducer as todosReducer,
   actions as todoActions,
   initialState as initialTodoState,
 } from './reducers/todos.reducer';
+import TodosPage from './pages/TodosPage';
+import Header from './shared/Header';
+import About from './pages/About';
+import NotFound from './pages/NotFound';
 
 function App() {
   const [todoState, dispatch] = useReducer(todosReducer, initialTodoState);
@@ -16,6 +21,8 @@ function App() {
   const token = `Bearer ${import.meta.env.VITE_PAT}`;
   const [sortField, setSortField] = useState('createdTime');
   const [sortDirection, setSortDirection] = useState('desc');
+  const location = useLocation();
+  const [title, setTitle] = useState('Todo List');
 
   const addTodo = async (newTodo) => {
     const payload = {
@@ -172,31 +179,44 @@ function App() {
     fetchTodos();
   }, [sortField, sortDirection, queryString]);
 
+  useEffect(() => {
+    if (location.pathname === '/') {
+      setTitle('Todo List');
+    } else if (location.pathname === '/about') {
+      setTitle('About');
+    } else {
+      setTitle('Not Found');
+    }
+  }, [location]);
+
   return (
     <div className={styles.app}>
       <div className={styles.container}>
-        <h1>My Todos</h1>
-        <TodoForm onAddTodo={addTodo} isSaving={todoState.isSaving} />
-        <TodoList
-          todoList={todoState.todoList}
-          onCompleteTodo={completeTodo}
-          onUpdateTodo={updateTodo}
-          isLoading={todoState.isLoading}
-        />
-        <hr />
-        <TodosViewForm
-          sortDirection={sortDirection}
-          setSortDirection={setSortDirection}
-          sortField={sortField}
-          setSortField={setSortField}
-          queryString={queryString}
-          setQueryString={setQueryString}
-        />
-        {todoState.errorMessage && (
-          <div className={styles.errorBox}>
-            <p>{todoState.errorMessage}</p>
-          </div>
-        )}
+        <Header title={title} />
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <TodosPage
+                onAddTodo={addTodo}
+                isSaving={todoState.isSaving}
+                todoList={todoState.todoList}
+                onCompleteTodo={completeTodo}
+                onUpdateTodo={updateTodo}
+                isLoading={todoState.isLoading}
+                sortDirection={sortDirection}
+                setSortDirection={setSortDirection}
+                sortField={sortField}
+                setSortField={setSortField}
+                queryString={queryString}
+                setQueryString={setQueryString}
+                errorMessage={todoState.errorMessage}
+              />
+            }
+          />
+          <Route path="/about" element={<About />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </div>
     </div>
   );
