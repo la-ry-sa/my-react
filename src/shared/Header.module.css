@@ -1,0 +1,20 @@
+.active {
+  color: gray;
+}
+.inactive {
+  color: black;
+}
+.header {
+  text-align: center;
+  position: relative;
+}
+.nav {
+  display: flex;
+  gap: 1rem;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+.header h1 {
+  margin: 0;
+}
